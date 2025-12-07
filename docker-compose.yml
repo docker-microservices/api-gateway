@@ -1,6 +1,6 @@
 services:
     api-gateway: 
-        image: khawlarouiss/api-gateway:latest
+        image: khawlarouiss/docker-microservices:api-gateway
         container_name: api-gateway
         ports:
             - "8090:8090"
