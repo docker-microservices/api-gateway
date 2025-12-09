@@ -36,6 +36,7 @@ jobs:
 
       - name: Build & Push Docker image
         run: |
+          ls -al target
           IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/docker-microservices:api-gateway
           docker build --build-arg JAR_FILE=$JAR_FILE -t $IMAGE_NAME .
           docker push $IMAGE_NAME
@@ -79,5 +80,4 @@ jobs:
             cd ~/docker-microservices/api-gateway
             docker pull ${DOCKER_USERNAME}/docker-microservices:api-gateway
             docker-compose down
-
             docker-compose up -d
