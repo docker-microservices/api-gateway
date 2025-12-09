@@ -80,5 +80,4 @@ jobs:
             cd ~/docker-microservices/api-gateway
             docker pull ${DOCKER_USERNAME}/docker-microservices:api-gateway
             docker-compose down
-            docker-compose up -d
-
+            docker-compose up -d --force-recreate
