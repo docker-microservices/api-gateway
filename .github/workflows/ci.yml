@@ -24,11 +24,16 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+
       - name: Maven Package
         run: mvn clean package --no-transfer-progress
 
-      - name: Copy artifact locally
-        run: cp target/*.jar /tmp/built-api-gateway.jar
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-gateway-jar
+          path: target/*.jar
+
 
   docker:
     needs: package
@@ -43,11 +48,58 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Copy artifact from package job
-        run: cp /tmp/built-api-gateway.jar .
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: api-gateway-jar
+          
+      - name: Verify JAR
+        run: ls -lh *.jar
 
       - name: Build & Push Docker image
         run: |
+          JAR_FILE=$(ls *.jar | head -n 1)
           IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/docker-microservices:api-gateway
-          docker build -t $IMAGE_NAME .
+          docker build --build-arg JAR_FILE=$JAR_FILE -t $IMAGE_NAME .
           docker push $IMAGE_NAME
+
+  deploy:
+    needs: docker  
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Prepare directory
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_PORT }}
+          script: |
+            mkdir -p ~/docker-microservices/api-gateway
+            echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" > ~/docker-microservices/api-gateway/.env
+  
+      - name: Copy docker-compose to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_PORT }}
+          source: "docker-compose.yml"
+          target: "~/docker-microservices/api-gateway/"
+  
+      - name: Deploy to VM via SSH
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_PORT }}
+          script: | 
+            cd ~/docker-microservices/api-gateway
+            docker pull ${DOCKER_USERNAME}/docker-microservices:api-gateway
+            docker-compose down
+            docker-compose up -d
