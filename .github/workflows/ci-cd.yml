@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI CD Pipeline
 
 on:
   push:
@@ -37,7 +37,7 @@ jobs:
       - name: Build & Push Docker image
         run: |
           JAR_FILE=$(ls target/*.jar | head -n 1)
-          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/docker-microservices:api-gateway
+          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
           docker build --build-arg JAR_FILE=$JAR_FILE -t $IMAGE_NAME .
           docker push $IMAGE_NAME
 
@@ -78,6 +78,6 @@ jobs:
           port: ${{ secrets.PROD_PORT }}
           script: | 
             cd ~/docker-microservices/api-gateway
-            docker pull ${DOCKER_USERNAME}/docker-microservices:api-gateway
+            docker pull ${DOCKER_USERNAME}/api-gateway:latest
             docker-compose down
             docker-compose up -d --force-recreate
