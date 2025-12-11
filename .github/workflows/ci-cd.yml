@@ -21,9 +21,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-maven-${{ github.repository }}-${{ github.ref_name }}
           restore-keys: |
-            ${{ runner.os }}-maven-
+            ${{ runner.os }}-maven-${{ github.repository }}-
 
       - name: Maven Package
         run: mvn clean package --no-transfer-progress
@@ -57,7 +57,6 @@ jobs:
           port: ${{ secrets.PROD_PORT }}
           script: |
             mkdir -p ~/docker-microservices/api-gateway
-            echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" > ~/docker-microservices/api-gateway/.env
   
       - name: Copy docker-compose to VM
         uses: appleboy/scp-action@v0.1.7
@@ -78,7 +77,5 @@ jobs:
           port: ${{ secrets.PROD_PORT }}
           script: | 
             cd ~/docker-microservices/api-gateway
-            docker-compose pull
-            docker-compose down
-            docker-compose up -d
-
+            sed -i "s|\${DOCKER_USERNAME}|${{ secrets.DOCKER_USERNAME }}|g" docker-compose.yml
+            docker stack deploy -c docker-compose.yml api-gateway

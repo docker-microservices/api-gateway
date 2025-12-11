@@ -1,7 +1,17 @@
 services:
     api-gateway: 
         image: "${DOCKER_USERNAME}/api-gateway:latest"
-        container_name: api-gateway
         ports:
             - "8090:8090"
-        restart: always 
+        networks:
+        - docker-ms:
+            aliases:
+              - api-gateway
+        deploy:
+            replicas: 1
+            restart_policy:
+            condition: on-failure
+
+networks:
+  docker-ms:
+    external: true
