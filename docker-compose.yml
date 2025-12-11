@@ -6,7 +6,7 @@ services:
         networks:
           docker-ms:
             aliases:
-              - discovery
+              - api-gateway
         deploy:
           replicas: 1
           restart_policy:
