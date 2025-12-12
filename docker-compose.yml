@@ -1,6 +1,6 @@
 services:
     api-gateway: 
-        image: "${DOCKER_USERNAME}/api-gateway:latest"
+        image: "${DOCKER_USERNAME}/api-gateway:${GITHUB_SHA}"
         ports:
             - "8090:8090"
         networks:
