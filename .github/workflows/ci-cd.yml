@@ -78,4 +78,5 @@ jobs:
           script: | 
             cd ~/docker-microservices/api-gateway
             sed -i "s|\${DOCKER_USERNAME}|${{ secrets.DOCKER_USERNAME }}|g" docker-compose.yml
-            docker stack deploy -c docker-compose.yml api-gateway
+            docker pull ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
+            docker stack deploy --with-registry-auth -c docker-compose.yml api-gateway
