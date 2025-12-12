@@ -12,9 +12,9 @@ public class GatewayConfig {
     public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
                 .route("books_service", r -> r.path("/books/**")
-                        .uri("lb://BOOKS-SERVICE"))
+                        .uri("lb://books-service"))
                 .route("authors_service", r -> r.path("/authors/**")
-                        .uri("lb://AUTHORS-SERVICE"))
+                        .uri("lb://authors-service"))
                 .build();
     }
 }
