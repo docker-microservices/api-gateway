@@ -17,14 +17,6 @@ jobs:
           java-version: 17
           distribution: temurin
 
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ github.repository }}-${{ github.ref_name }}
-          restore-keys: |
-            ${{ runner.os }}-maven-${{ github.repository }}-
-
       - name: Maven Package
         run: mvn clean package --no-transfer-progress
 
@@ -80,3 +72,4 @@ jobs:
             sed -i "s|\${DOCKER_USERNAME}|${{ secrets.DOCKER_USERNAME }}|g" docker-compose.yml
             docker pull ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
             docker stack deploy --with-registry-auth -c docker-compose.yml api-gateway
+
