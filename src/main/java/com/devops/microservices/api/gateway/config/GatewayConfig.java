@@ -11,10 +11,10 @@ public class GatewayConfig {
     @Bean
     public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("books_service", r -> r.path("/books/**")
-                        .uri("lb://books-service"))
-                .route("authors_service", r -> r.path("/authors/**")
-                        .uri("lb://authors-service"))
+            .route("books_service", r -> r.path("/api/books/**")
+                   .uri("lb://books-service"))
+            .route("authors_service", r -> r.path("/api/authors/**")
+                    .uri("lb://authors-service"))
                 .build();
     }
 }
